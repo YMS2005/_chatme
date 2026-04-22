@@ -1,6 +1,5 @@
 package me._chatme;
 
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -15,8 +14,11 @@ import java.net.Socket;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class Client_X extends Application
+public class Client_X extends Login_Controller
 {
+    public static java.net.Socket socket;
+    public static java.io.PrintWriter out;
+
     public void start(Stage PrimaryStage)
     {
         try
@@ -33,53 +35,41 @@ public class Client_X extends Application
             e.printStackTrace();
         }
     }
-    public static void main(String args[]) throws IOException {
-
+    public static void main(String args[]) throws IOException
+    {
+        Login_Controller LG = new Login_Controller();
         launch(args);
-        int ID;
-        int IDPT;
-        Scanner sc = new Scanner(System.in);
+        System.out.println("Connecting as ID: " + Login_Controller.ID + " on port: " + Login_Controller.IDPT);
 
-        System.out.print("Please enter ID: ");
-        ID = sc.nextInt();
+        startConnection();
 
-        System.out.print("Hi " + ID + " please enter your port number,\nit has to be the last 5 digits of your ID: ");
-        IDPT = sc.nextInt();
+        System.out.println("Disconnected.");
+    }
 
-        if (String.valueOf(Math.abs(IDPT)).length() < 5) {
-            if (IDPT < 1024) {
-                System.out.println("Reserved port, adding 10,000.");
-                IDPT += 10000;
-            } else {
-                System.out.println("Less than 5 digits, exiting.");
-                sc.close();
-                return;
-            }
-        } else if (String.valueOf(Math.abs(IDPT)).length() > 5) {
-            System.out.println("More than 5 digits, exiting.");
-            sc.close();
-            return;
-        } else if (IDPT > 65535) {
-            System.out.println("Port out of range, exiting.");
-            sc.close();
-            return;
-        }
-
-        System.out.println("Connecting as ID: " + ID + " on port: " + IDPT);
-
-        try (
-            Socket socket = new Socket("localhost", IDPT);
-            PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+    public static void startConnection() {
+        try {
+            socket = new Socket("localhost", Login_Controller.IDPT);
+            out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            Scanner input = new Scanner(System.in)
-        ) {
-            System.out.println("Connected! Type messages (or 'quit' to exit):");
-
+            System.out.println("Connected! You can now send messages from the GUI.");
             // Thread: constantly listens for incoming broadcasts
             Thread listener = new Thread(() -> {
                 try {
                     String incoming;
                     while ((incoming = in.readLine()) != null) {
+                        String finalIncoming = incoming;
+                        javafx.application.Platform.runLater(() -> {
+                            if (finalIncoming.startsWith("CLIENTS:")) {
+                                String[] clients = finalIncoming.substring(8).split(",");
+                                if (Main_Controller.staticClientList != null) {
+                                    Main_Controller.staticClientList.getItems().setAll(clients);
+                                }
+                            } else {
+                                if (Main_Controller.staticChatArea != null) {
+                                    Main_Controller.staticChatArea.appendText(finalIncoming + "\n");
+                                }
+                            }
+                        });
                         System.out.println(incoming);
                     }
                 } catch (IOException e) {
@@ -88,21 +78,10 @@ public class Client_X extends Application
             });
             listener.setDaemon(true);
             listener.start();
-
-            // Main thread: handles sending
-            while (true) {
-                String msg = input.nextLine();
-                if (msg.equalsIgnoreCase("quit")) break;
-                out.println("[" + ID + "]: " + msg);
-            }
-
         } catch (ConnectException e) {
             System.out.println("Could not connect. Is the server running?");
         } catch (IOException e) {
             System.out.println("Connection error: " + e.getMessage());
         }
-
-        System.out.println("Disconnected.");
-        sc.close();
     }
 }

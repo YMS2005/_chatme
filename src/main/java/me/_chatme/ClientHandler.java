@@ -27,7 +27,17 @@ public class ClientHandler implements Runnable
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             Server.clinets.add(out);
+            Server.clientAddresses.add(clientAddr);
             System.out.println("[" + clientAddr + "] Connected");
+            broadcast("CLIENTS:" + String.join(",", Server.clientAddresses));
+            javafx.application.Platform.runLater(() -> {
+                if (Server_Controller.logAreaStatic != null) {
+                    Server_Controller.logAreaStatic.appendText("[" + clientAddr + "] Connected\n");
+                }
+                if (Server_Controller.clientListStatic != null) {
+                    Server_Controller.clientListStatic.getItems().add(clientAddr);
+                }
+            });
             String Message;
             while ((Message = in.readLine()) != null)
             {
@@ -43,8 +53,18 @@ public class ClientHandler implements Runnable
         finally
         {
             Server.clinets.remove(out);
+            Server.clientAddresses.remove(clientAddr);
+            broadcast("CLIENTS:" + String.join(",", Server.clientAddresses));
             System.out.print("Disconnect " + Server.clinets.size() + " Clients");
-            try 
+            javafx.application.Platform.runLater(() -> {
+                if (Server_Controller.logAreaStatic != null) {
+                    Server_Controller.logAreaStatic.appendText("[" + clientAddr + "] Disconnected\n");
+                }
+                if (Server_Controller.clientListStatic != null) {
+                    Server_Controller.clientListStatic.getItems().remove(clientAddr);
+                }
+            });
+            try
             {
                 clientSocket.close();
             } 
@@ -58,7 +78,9 @@ public class ClientHandler implements Runnable
 
     private void broadcast(String message) {
         for (PrintWriter client : Server.clinets) {
-            client.println(message);
+            if (client != out) {
+                client.println(message);
+            }
         }
     }
 }
