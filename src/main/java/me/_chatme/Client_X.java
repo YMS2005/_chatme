@@ -35,14 +35,13 @@ public class Client_X extends Login_Controller
             e.printStackTrace();
         }
     }
+
     public static void main(String args[]) throws IOException
     {
         Login_Controller LG = new Login_Controller();
         launch(args);
         System.out.println("Connecting as ID: " + Login_Controller.ID + " on port: " + Login_Controller.IDPT);
-
         startConnection();
-
         System.out.println("Disconnected.");
     }
 
@@ -52,6 +51,8 @@ public class Client_X extends Login_Controller
             out = new PrintWriter(socket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             System.out.println("Connected! You can now send messages from the GUI.");
+
+
             // Thread: constantly listens for incoming broadcasts
             Thread listener = new Thread(() -> {
                 try {

@@ -13,9 +13,10 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
 
-public class Server extends Application {
+
+public class Server extends Application
+{
     static List<PrintWriter> clinets = Collections.synchronizedList(new ArrayList<>());
     static List<String> clientAddresses = Collections.synchronizedList(new ArrayList<>());
     static int IDPT;
@@ -33,14 +34,17 @@ public class Server extends Application {
         }
     }
 
-    static void Start_Server() throws IOException {
+    static void Start_Server() throws IOException
+    {
         try (ServerSocket serverSocket = new ServerSocket(IDPT)) {
-            javafx.application.Platform.runLater(() -> {
+            javafx.application.Platform.runLater(() ->
+            {
                 if (Server_Controller.logAreaStatic != null) {
                     Server_Controller.logAreaStatic.appendText("Server is running and waiting for client connection...\n");
                 }
             });
-            while (true) {
+            while (true)
+            {
                 try {
                     // Accept incoming client connection
                     Socket clientSocket = serverSocket.accept();

@@ -12,21 +12,16 @@ import java.util.ResourceBundle;
 
 public class Server_Controller implements Initializable {
 
-    @FXML
-    private TextField portField;
-    @FXML
-    private Button startButton;
-    @FXML
-    private TextArea logArea;
-    @FXML
-    private ListView<String> clientList;
+    @FXML private TextField portField;
+    @FXML private Button startButton;
+    @FXML private ListView<String> clientList;
 
-    public static TextArea logAreaStatic;
+    // Kept as null — ClientHandler already null-checks it before using
+    public static TextArea logAreaStatic = null;
     public static ListView<String> clientListStatic;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        logAreaStatic = logArea;
         clientListStatic = clientList;
         startButton.setOnAction(e -> startServer());
     }
@@ -37,29 +32,28 @@ public class Server_Controller implements Initializable {
             int port = Integer.parseInt(portField.getText().trim());
             if (String.valueOf(Math.abs(port)).length() < 5) {
                 if (port < 1024) {
-                    logArea.appendText("Adjusting port to " + (port + 10000) + "\n");
                     port += 10000;
                 } else {
-                    logArea.appendText("Invalid port: must be last 5 digits of ID.\n");
+                    System.out.println("Invalid port: must be 5 digits.");
                     return;
                 }
             } else if (port > 65535) {
-                logArea.appendText("Port out of range.\n");
+                System.out.println("Port out of range.");
                 return;
             }
             Server.IDPT = port;
-            logArea.appendText("Starting server on port " + port + "\n");
+            System.out.println("Starting server on port " + port);
             Thread serverThread = new Thread(() -> {
                 try {
                     Server.Start_Server();
                 } catch (Exception ex) {
-                    javafx.application.Platform.runLater(() -> logArea.appendText("Server error: " + ex.getMessage() + "\n"));
+                    System.out.println("Server error: " + ex.getMessage());
                 }
             });
             serverThread.setDaemon(true);
             serverThread.start();
         } catch (NumberFormatException e) {
-            logArea.appendText("Invalid port number.\n");
+            System.out.println("Invalid port number.");
         }
     }
 }

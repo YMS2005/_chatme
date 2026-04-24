@@ -20,16 +20,16 @@ public class ClientHandler implements Runnable
     public void run()
     {
         String clientAddr = clientSocket.getInetAddress().toString();
-        try (
-            BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()))
-        )
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())))
         {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             Server.clinets.add(out);
             Server.clientAddresses.add(clientAddr);
             System.out.println("[" + clientAddr + "] Connected");
+
             broadcast("CLIENTS:" + String.join(",", Server.clientAddresses));
+
             javafx.application.Platform.runLater(() -> {
                 if (Server_Controller.logAreaStatic != null) {
                     Server_Controller.logAreaStatic.appendText("[" + clientAddr + "] Connected\n");
@@ -38,6 +38,7 @@ public class ClientHandler implements Runnable
                     Server_Controller.clientListStatic.getItems().add(clientAddr);
                 }
             });
+
             String Message;
             while ((Message = in.readLine()) != null)
             {
