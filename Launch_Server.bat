@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
 
 REM Run the JAR file
 echo Starting ChatME Server...
-java -jar "%SCRIPT_DIR%target\ChatME-Server.jar"
+java -jar "%SCRIPT_DIR%launch\ChatME-Server.jar"
 
 if %errorlevel% neq 0 (
     echo Error: Failed to start ChatME Server.

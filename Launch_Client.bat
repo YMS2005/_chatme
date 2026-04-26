@@ -18,7 +18,7 @@ if %errorlevel% neq 0 (
 
 REM Run the JAR file
 echo Starting ChatME Client...
-java -jar "%SCRIPT_DIR%target\ChatME-Client.jar"
+java -jar "%SCRIPT_DIR%launch\ChatME-Client.jar"
 
 if %errorlevel% neq 0 (
     echo Error: Failed to start ChatME Client.
